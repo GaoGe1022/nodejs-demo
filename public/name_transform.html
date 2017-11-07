@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript"></script>            
+    <meta charset = "GB2312">
+</head>
+<body>
+    <div id = "div1"  />
+        <h1>DrawName</h1>
+		
+    <label>Please Choose Your File</label>
+    <input id = "fileinput" type = "file" onchange = "control()" />
+    <br> </br>
+    <canvas id = "myCanvas1" width = "400" height = "400"
+    style = "border : 1px solid #99D499;" >    
+    </canvas>
+	<br> <br>
+    <button onclick="leftIncline()">左斜</button>
+    
+    <button onclick="Shrug()">耸肩</button>
+    <br> <br>
+    请输入放大倍数：
+    <input type="number" min="1" max="10" id="N">
+    <button onclick="ZoomIn()">放大</button>
+    <br> <br>
+    <td>请输入缩小倍数：</td>
+    <input type="number" min="1" max="10" id="M">
+    <button onclick="ZoomOut()">缩小</button>
+    <br> <br>
+    请输入旋转角度：
+    <input type="number" min="1" max="180" id="angle1">
+    <button onclick="clockwiseRotation()">顺时针旋转</button>
+    <button onclick="AnticlockwiseRotation()">逆时针旋转</button>
+    <br><br>
+    请输入X方向平移长度：
+    <input type="number" min="1" max="100" id="X">
+    <br></br>
+    请输入y方向平移长度：
+    <input type="number" min="1" max="100" id="Y">
+    <button onclick="Translate()">平移</button>
+    <br> </br>
+    请输入对称点X值：
+    <input type="number" min="1" ,max="100" id="Xzhou">
+    <br> </br>
+    请输入对称点Y值：
+    <input type="number" min="1" ,max="100" id="Yzhou">
+    <button onclick="symmetryPoint()">对称</button>
+    <br> </br>
+    <script>
+
+	var coordX = new Array();
+                var coordY = new Array();
+                for (var m = 0;m < 100 ; m++)
+                {
+					coordX[m] = new Array;
+                    coordY[m] = new Array;
+                    for (var n = 0;n < 10; n++)
+                    {
+                        coordX[m][n] = "";
+                        coordY[m][n] = "";
+                    }
+                }
+	 var c = document.getElementById("myCanvas1");
+     var ctx1 = c.getContext("2d");
+     ctx1.fillStyle = "FF0000";
+     function control()
+        {
+            var file = document.getElementById("fileinput").files[0];   
+            var reader = new FileReader();
+            reader.readAsText(file);
+            reader.onload = function(e)
+            {
+                var str = this.result; 
+                for (var m = 0;m < 100 ; m++)
+                {
+                    for (var n = 0;n < 10; n++)
+                    {
+                        coordX[m][n] = "";
+                        coordY[m][n] = "";
+                    }
+                }
+                Separation(str,coordX,coordY);
+
+                DrawName(coordX,coordY,ctx1);
+            }
+        }
+function DrawName(coordX,coordY,ctx1)
+{
+    for (var i = 0;i < coordX.length;i++)
+    {        
+        for (var j = 0;j < coordX[i].length;j++)
+        {                   
+            ctx1.beginPath();
+            ctx1.moveTo(coordX[i][j],coordY[i][j]);
+            ctx1.lineTo(coordX[i][j+1],coordY[i][j+1]); 
+            ctx1.stroke();     
+        }
+        
+    } 
+}   
+function Separation(str,coordX,coordY)
+{
+    var items = new Array();
+    items = str.split("END\r\n"); 
+    var lines = new Array();
+    for (var m = 0;m < items.length ; m++) 
+    {
+        lines[m] = new Array();
+        for (var n = 0;n < 10;n++)
+        {
+            lines[m][n] = "";
+        }
+    }
+    for (var i = 0;i < items.length ; i++)
+    {
+        lines[i] = items[i].split("\r\n");
+    }
+    for (var p = 0;p < lines.length ; p++)
+    {
+        for (var q = 1;q < lines[p].length ; q++)
+        {
+            coordX[p][q-1] = Number(lines[p][q].split(",")[0]);
+            coordY[p][q-1] = Number(lines[p][q].split(",")[1]);
+        }
+    }
+}
+
+function leftIncline()
+{
+    //左斜变化
+    var b = coordY[0][0] - 2 * (coordX[0][0] - 10);
+    var m = 0;
+    for (var i = 0;i < coordX.length; i++)
+    {
+        for (var j = 0;j < coordX[i].length; j++)
+        {
+            m = coordX[i][j] - (coordY[i][j] - b) / 2;
+            coordX[i][j] = coordX[i][j] - (coordX[i][j] - m)/5;
+        }
+    }
+    ctx1.clearRect(0,0,500,500);
+    DrawName(coordX,coordY,ctx1);
+}
+
+function Shrug()
+{
+    //耸肩变化
+    var b = coordY[0][0] + 10 - coordX[0][0] / 2;
+    var n = 0;
+    for (var i = 0;i < coordX.length; i++)
+    {
+        for (var j = 0;j < coordX[i].length; j++)
+        {
+            n = (coordY[i][j] - b) / 2;
+            coordY[i][j] = coordY[i][j] + (coordX[i][j] / 2 + b - coordY[i][j]) / 5;
+        }
+    }
+    ctx1.clearRect(0,0,500,500);
+    DrawName(coordX,coordY,ctx1);
+}
+function  ZoomIn()
+{
+    //放大
+    var N = document.getElementById("N").value;
+    for (var i = 0;i < coordX.length; i++)
+    {
+        for (var j = 0;j < coordX[i].length; j++)
+        {
+        for (var j = 0;j < coordX[i].length; j++){
+        coordX[i][j] = Number(N) * (Number(coordX[i][j]) - Number(coordX[0][0])) + Number(coordX[0][0]);
+        coordY[i][j] = Number(N) * (Number(coordY[i][j]) - Number(coordY[0][0])) + Number(coordY[0][0]);}
+        }
+    }
+    ctx1.clearRect(0,0,500,500);
+    DrawName(coordX,coordY,ctx1);
+}
+function ZoomOut()
+{
+    //缩小
+    var M = document.getElementById("M").value;
+    for (var i = 0;i <  coordX.length; i++)
+    {
+        for (var j = 0;j <  coordX[i].length; j++)
+        {
+            coordX[i][j] = (Number(coordX[i][j]) - Number(coordX[0][0]))/Number(M) + Number(coordX[0][0]);
+            coordY[i][j] = (Number(coordY[i][j]) - Number(coordY[0][0]))/Number(M) + Number(coordY[0][0]);
+        }
+    }
+    ctx1.clearRect(0,0,500,500);
+    DrawName(coordX,coordY,ctx1);
+}
+function clockwiseRotation()
+{
+        //顺时针旋转
+      var angle = document.getElementById("angle1").value;
+      for (var i = 0;i < coordX.length; i++)
+      {
+          for (var j = 0;j < coordX[i].length; j++)
+           {
+            coordX[i][j] = Number(coordX[i][j] * Math.cos(angle) - Number(coordY[i][j]) * Math.sin(angle));
+              coordY[i][j] = Number(coordY[i][j] * Math.sin(angle) + Number(coordY[i][j]) * Math.cos(angle));
+           }
+       }
+       ctx1.clearRect(0,0,500,500);
+        DrawName(coordX,coordY,ctx1);
+}
+
+function AnticlockwiseRotation()
+{
+        //逆时针旋转
+         var angle = document.getElementById("angle1").value;
+        for (var i = 0;i < coordX.length; i++)
+        {
+            for (var j = 0;j < coordX[i].length; j++)
+             {
+              coordX[i][j] = Number(coordX[i][j]) * Math.cos(-angle) - Number(coordY[i][j]) * Math.sin(-angle);
+              coordY[i][j] = Number(coordY[i][j]) * Math.sin(-angle) + Number(coordY[i][j]) * Math.cos(-angle);
+             }
+         }
+
+         ctx1.clearRect(0,0,500,500);
+         DrawName(coordX,coordY,ctx1);
+}
+
+function symmetryXLine()
+{
+          //X对称
+         for (var i = 0;i < coordX.length; i++)
+        {
+            for (var j = 0;j < coordX[i].length; j++)
+            {
+              coordY[i][j] = Number(coordY[i][j]) + 2 * (Number(Y) - Number(coordY[i][j]));
+            }
+        }
+        ctx1.clearRect(0,0,500,500);
+        DrawName(coordX,coordY,ctx1);
+}
+
+function symmetryYLine()
+{
+        //Y对称
+        for (var i = 0;i < coordX.length; i++)
+        {
+            for (var j = 0;j < coordX[i].length; j++)
+           {
+                coordX[i][j] = Number(coordX[i][j]) + 2 * (Number(X) - Number(coordX[i][j]));
+           }
+        }
+         ctx1.clearRect(0,0,500,500);
+          DrawName(coordX,coordY,ctx1);
+}
+
+function symmetryPoint()
+{
+         //点对称
+         var Xlen = document.getElementById("Xzhou").value;
+         var Ylen = document.getElementById("Yzhou").value;
+         for (var i = 0;i < coordX.length; i++)
+        {
+            for (var j = 0;j < coordX[i].length; j++)
+            {
+              coordX[i][j] = Number(coordX[i][j]) + 2 * (Number(Xlen) - Number(coordX[i][j]));
+              coordY[i][j] = Number(coordY[i][j]) + 2 * (Number(Ylen) - Number(coordY[i][j]));
+            }
+        }
+        ctx1.clearRect(0,0,500,500);
+        DrawName(coordX,coordY,ctx1);
+}
+
+function Translate()
+{
+         //平移
+         var Xlen = document.getElementById("X").value;
+         var Ylen = document.getElementById("Y").value; 
+         for (var i = 0;i < coordX.length; i++)
+         {
+             for (var j = 0;j < coordX[i].length; j++)
+            {
+              coordX[i][j] = Number(Xlen) + Number(coordX[i][j]);
+              coordY[i][j] = Number(Ylen) + Number(coordY[i][j]);
+            }
+         }
+         ctx1.clearRect(0,0,500,500);
+         DrawName(coordX,coordY,ctx1);
+}
+</script>
+
+</body>
+</html>"# name_transform" 
+"# name_transform" 
